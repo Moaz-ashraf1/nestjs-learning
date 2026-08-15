@@ -49,7 +49,6 @@ export class ProductController {
   }
 
  
-
   @Delete('/api/products/:id')
   public deleteProduct(@Param('id') id:string ){
     const product = this.products.find(p => p.id === parseInt(id));
