@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Req, Res, Headers } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 type ProductType = {id: number, title: string, price: number}
@@ -11,6 +12,7 @@ export class ProductController {
     {id: 2, title: 'pen', price: 5},
     {id: 3, title: 'pencil', price: 2},
   ];
+
 
   @Post('/api/products')
   public createNewProduct (@Body() body:CreateProductDto ){
@@ -39,11 +41,12 @@ export class ProductController {
     return product; 
   }
 
+  
   @Put('/api/products/:id')
   public updateProduct(@Param('id') id:string, @Body() body:UpdateProductDto){
     const product = this.products.find( p => p.id === parseInt(id) );
     if(!product) throw new NotFoundException("product not found");
-
+    console.log(body)
     return {message: 'product updated successfully with id ' + id};
     
   }
@@ -57,6 +60,19 @@ export class ProductController {
     return {message: 'product deleted'};
 
 
+  }
+
+  @Post("api/products/express-way")
+  public createNewProductWithExpress(@Req() req:Request , @Res() res:Response, @Headers() headers: any){
+    const newProduct:ProductType =  {
+      id:this.products.length + 1,
+      title:req.body.title,
+      price:req.body.price
+    }
+
+    this.products.push(newProduct);
+    console.log(headers);
+    res.status(200).json(newProduct);
   }
   
 }
