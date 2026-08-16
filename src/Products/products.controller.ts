@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Req, Res, Headers } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
@@ -35,8 +35,8 @@ export class ProductController {
   }
 
   @Get('/api/products/:id')
-  public getSingleProduct(@Param("id") id : string){
-    const product = this.products.find( p => p.id === parseInt(id) );
+  public getSingleProduct(@Param("id" ,ParseIntPipe) id : number){
+    const product = this.products.find( p => p.id ===id );
     if(!product) throw new NotFoundException("product not found");
     return product; 
   }
@@ -62,17 +62,6 @@ export class ProductController {
 
   }
 
-  @Post("api/products/express-way")
-  public createNewProductWithExpress(@Req() req:Request , @Res() res:Response, @Headers() headers: any){
-    const newProduct:ProductType =  {
-      id:this.products.length + 1,
-      title:req.body.title,
-      price:req.body.price
-    }
 
-    this.products.push(newProduct);
-    console.log(headers);
-    res.status(200).json(newProduct);
-  }
   
 }
