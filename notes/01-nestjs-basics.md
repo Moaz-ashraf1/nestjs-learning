@@ -363,3 +363,81 @@ res.json()
 res.cookie()
 
 In normal NestJS development, I should prefer the NestJS way and only use the Express Request/Response objects when I actually need them
+
+## Pipes
+
+Pipes are used in NestJS mainly for:
+
+- Transformation
+- Validation
+
+A Pipe processes data before it reaches the route handler.
+
+### Example: ParseIntPipe
+
+URL parameters are received as strings.
+
+For example:
+
+````http
+GET /api/products/10
+The id initially comes as:
+"10"
+
+We can use ParseIntPipe:
+
+```ts
+@Get('/api/products/:id')
+findProduct(
+  @Param('id', ParseIntPipe) id: number,
+) {
+  return this.productsService.findById(id);
+}
+````
+
+The flow becomes:
+
+```
+"10"
+  ↓
+ParseIntPipe
+  ↓
+10
+  ↓
+Controller
+  ↓
+Service
+  ↓
+Database
+```
+
+ParseIntPipe transforms the value from a string into a number.
+It also validates that the value can be parsed as an integer.
+For example:
+
+```http
+GET /api/products/abc
+```
+
+The transformation fails, so the request is rejected and the
+route handler does not continue to the service or database.
+
+Important Idea
+A Pipe can process the incoming data before the route handler
+executes.
+
+So instead of handling the conversion manually inside the
+controller:
+
+```ts
+const id = parseInt(id);
+```
+
+NestJS can handle it using:
+
+```ts
+@Param('id', ParseIntPipe) id: number
+```
+
+This keeps the controller cleaner and makes the data entering
+the handler more predictable.
