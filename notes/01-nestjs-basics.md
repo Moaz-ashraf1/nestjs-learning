@@ -18,10 +18,10 @@ NestJS organizes the application into modules.
 
 For example, in a Foodlify project I can have:
 
-- UserModule
-- ProductModule
-- CartModule
-- OrderModule
+- `UserModule`
+- `ProductModule`
+- `CartModule`
+- `OrderModule`
 
 Each module groups the things related to a specific feature.
 
@@ -31,31 +31,37 @@ Each module groups the things related to a specific feature.
 
 A Controller is responsible for receiving HTTP requests.
 
-Example:
+### Example
 
+```typescript
 @Post('/api/products')
+```
 
-This tells Nest that when a POST request comes to
-/api/products, the corresponding method should be executed.
+This tells Nest that when a `POST` request comes to `/api/products`, the
+corresponding method should be executed.
 
 ---
 
 ## Request Body
 
-@Body() tells Nest where the value of the parameter should come from.
+`@Body()` tells Nest where the value of the parameter should come from.
 
-Example:
+### Example
 
+```typescript
 @Body() body
+```
 
 This means that the value of `body` comes from the HTTP request body.
 
 If the client sends:
 
+```json
 {
-"name": "iPhone",
-"price": 30000
+  "name": "iPhone",
+  "price": 30000
 }
+```
 
 Then `body` contains this object.
 
@@ -67,43 +73,54 @@ A Controller can depend on a Service.
 
 For example:
 
+```text
 CartController
-↓
+      ↓
 CartService
+```
 
 Instead of creating the service manually using:
 
-new CartService()
+```typescript
+new CartService();
+```
 
-I tell Nest that my Controller needs CartService:
+I tell Nest that my Controller needs `CartService`:
 
+```typescript
 constructor(private readonly cartService: CartService)
+```
 
 Nest then provides the service because it is registered as a provider
 inside the module.
 
-This reduces coupling and makes the application easier to maintain
-and test.
+This reduces coupling and makes the application easier to maintain and
+test.
 
 ---
 
 ## Exception Handling
 
-In NestJS, I don't always need to use try/catch just to return an HTTP error.
+In NestJS, I don't always need to use `try/catch` just to return an HTTP
+error.
 
 For example:
 
-throw new NotFoundException('Product not found');
+```typescript
+throw new NotFoundException("Product not found");
+```
 
 Nest's built-in exception handling can catch the exception and turn it
 into an appropriate HTTP response.
 
-## Express Under the Hood
+---
+
+# Express Under the Hood
 
 NestJS uses Express as its default HTTP adapter.
 
-This means that NestJS uses Express under the hood to handle
-HTTP requests and responses.
+This means that NestJS uses Express under the hood to handle HTTP
+requests and responses.
 
 NestJS also supports Fastify as an alternative HTTP adapter.
 
@@ -111,260 +128,324 @@ NestJS also supports Fastify as an alternative HTTP adapter.
 
 ## NestJS Way vs Express Way
 
-In NestJS, the preferred way is to use NestJS decorators:
+In NestJS, the preferred way is to use NestJS decorators.
 
-`typescript
+### NestJS Way
+
+```typescript
 @Post('/api/products')
 createProduct(@Body() body: CreateProductDto) {
-return body;
+  return body;
 }
+```
 
 NestJS handles the HTTP response automatically when I return a value.
 
 ---
 
-Express Way
+## Express Way
 
-NestJS also allows us to access the underlying Express Request and Response objects.
+NestJS also allows us to access the underlying Express Request and
+Response objects.
 
+```typescript
 @Post('/api/products')
 createProduct(
-@Req() req: Request,
-@Res() res: Response,
+  @Req() req: Request,
+  @Res() res: Response,
 ) {
-console.log(req.body);
+  console.log(req.body);
 
-res.json({
-message: 'Product created',
-});
+  res.json({
+    message: 'Product created',
+  });
 }
+```
 
 Here, I am dealing with the Express Request and Response directly.
 
 ---
 
-@Req()
+## `@Req()`
 
-@Req() gives me access to the complete HTTP Request object.
+`@Req()` gives me access to the complete HTTP Request object.
 
+```typescript
 @Post('/api/products')
 createProduct(@Req() req: Request) {
-console.log(req.body);
+  console.log(req.body);
 }
+```
 
-Since NestJS uses Express by default, this can be the Express Request object.
+Since NestJS uses Express by default, this can be the Express Request
+object.
 
 I can access things such as:
 
-req.body
-req.params
-req.query
-req.headers
+```typescript
+req.body;
+req.params;
+req.query;
+req.headers;
+```
 
 ---
 
-@Res()
+## `@Res()`
 
-@Res() gives me access to the underlying Response object.
+`@Res()` gives me access to the underlying Response object.
 
+```typescript
 @Post('/api/products')
 createProduct(@Res() res: Response) {
-res.status(201).json({
-message: 'Product created',
-});
+  res.status(201).json({
+    message: 'Product created',
+  });
 }
+```
 
 I can use Express Response methods such as:
 
-res.json()
-res.status()
-res.cookie()
+```typescript
+res.json();
+res.status();
+res.cookie();
+```
 
-When I use @Res() normally, I become responsible for sending the response.
+When I use `@Res()` normally, I become responsible for sending the
+response.
 
 ---
 
-@Res({ passthrough: true })
+## `@Res({ passthrough: true })`
 
-Sometimes I need the Express Response object to modify the response, but I still want NestJS to handle the response normally.
+Sometimes I need the Express Response object to modify the response, but
+I still want NestJS to handle the response normally.
 
 For example, I may need to set a cookie:
 
+```typescript
 @Post('/login')
 login(@Res({ passthrough: true }) res: Response) {
-res.cookie('access_token', 'abc123');
+  res.cookie('access_token', 'abc123');
 
-return {
-message: 'Logged in successfully',
-};
+  return {
+    message: 'Logged in successfully',
+  };
 }
+```
 
 Here:
 
-res.cookie() modifies the HTTP response.
-
-return allows NestJS to handle the response body.
-
-passthrough: true allows me to use the Response object without taking full control of the response.
+- `res.cookie()` modifies the HTTP response.
+- `return` allows NestJS to handle the response body.
+- `passthrough: true` allows me to use the Response object without
+  taking full control of the response.
 
 ---
 
-@Headers()
+## `@Headers()`
 
-NestJS provides the @Headers() decorator to access HTTP request headers.
+NestJS provides the `@Headers()` decorator to access HTTP request
+headers.
 
-I can get all headers:
+### Get all headers
 
+```typescript
 @Get()
 getProducts(@Headers() headers: any) {
-console.log(headers);
+  console.log(headers);
 }
+```
 
-Or I can get a specific header:
+### Get a specific header
 
+```typescript
 @Get()
 getProducts(
-@Headers('authorization') authorization: string,
+  @Headers('authorization') authorization: string,
 ) {
-console.log(authorization);
+  console.log(authorization);
 }
+```
 
 ---
 
-@Headers() vs req.headers
+## `@Headers()` vs `req.headers`
 
 I can also access headers through the Express Request:
 
+```typescript
 @Get()
 getProducts(@Req() req: Request) {
-console.log(req.headers);
+  console.log(req.headers);
 }
+```
 
-But in NestJS, it is usually cleaner to use the specific decorator when I only need the headers:
+But in NestJS, it is usually cleaner to use the specific decorator when
+I only need the headers:
 
+```typescript
 @Headers()
+```
 
 The decorator extracts the required data from the underlying request.
 
 Conceptually:
 
+```text
 @Body()
-↓
+   ↓
 Request Body
 
 @Headers()
-↓
+   ↓
 Request Headers
 
 @Param()
-↓
+   ↓
 URL Parameters
 
 @Query()
-↓
+   ↓
 Query Parameters
 
 @Req()
-↓
+   ↓
 The complete Request object
 
 @Res()
-↓
+   ↓
 The Response object
+```
 
 ---
 
-Express Request Types
+## Express Request Types
 
-When using the Express Request and Response types, I can import them as type-only imports:
+When using the Express Request and Response types, I can import them as
+type-only imports:
 
-import type { Request, Response } from 'express';
+```typescript
+import type { Request, Response } from "express";
+```
 
-This is because Request and Response are TypeScript types in this context.
+This is because `Request` and `Response` are TypeScript types in this
+context.
 
 ---
 
-Typing the Request Body
+## Typing the Request Body
 
-Express's Request type supports generics, so I can specify the expected type of the request body.
+Express's `Request` type supports generics, so I can specify the
+expected type of the request body.
 
 For example:
 
+```typescript
 type CreateProductBody = {
-title: string;
-price: number;
+  title: string;
+  price: number;
 };
+```
 
 Then:
 
+```typescript
 @Req() req: Request<{}, {}, CreateProductBody>
+```
 
 Now TypeScript knows the expected structure of:
 
-req.body
+```typescript
+req.body;
+```
 
 So:
 
-req.body.title
+```typescript
+req.body.title;
+```
 
-is a string, and:
+is a `string`, and:
 
-req.body.price
+```typescript
+req.body.price;
+```
 
-is a number.
+is a `number`.
 
 ---
 
-NestJS Decorators vs Express Objects
+## NestJS Decorators vs Express Objects
 
-The preferred approach in NestJS is to use NestJS decorators when possible:
+The preferred approach in NestJS is to use NestJS decorators when
+possible:
 
+```typescript
 @Body()
 @Param()
 @Query()
 @Headers()
+```
 
-These decorators allow me to work with only the part of the request that I actually need.
+These decorators allow me to work with only the part of the request that
+I actually need.
 
 I should use:
 
+```typescript
 @Req()
 @Res()
+```
 
-when I specifically need access to the underlying Request or Response objects.
+when I specifically need access to the underlying Request or Response
+objects.
 
 ---
 
-Main Idea
+## Main Idea
 
-NestJS uses Express by default under the hood to handle HTTP requests and responses.
+NestJS uses Express by default under the hood to handle HTTP requests
+and responses.
 
-However, NestJS provides its own decorators and abstractions to make working with HTTP requests easier and cleaner.
+However, NestJS provides its own decorators and abstractions to make
+working with HTTP requests easier and cleaner.
 
-I can still access the underlying Express objects when I need more control or need Express-specific functionality.
+I can still access the underlying Express objects when I need more
+control or need Express-specific functionality.
 
 The important distinction is:
 
-NestJS Way
-↓
+### NestJS Way
+
+```text
 @Body()
 @Param()
 @Query()
 @Headers()
 return data
+```
 
-Express Way
-↓
+### Express Way
+
+```text
 @Req()
 @Res()
+
 req.body
 req.headers
+
 res.json()
 res.cookie()
+```
 
-In normal NestJS development, I should prefer the NestJS way and only use the Express Request/Response objects when I actually need them
+In normal NestJS development, I should prefer the NestJS way and only
+use the Express Request/Response objects when I actually need them.
 
-## Pipes
+---
+
+# Pipes
 
 Pipes are used in NestJS mainly for:
 
@@ -373,31 +454,38 @@ Pipes are used in NestJS mainly for:
 
 A Pipe processes data before it reaches the route handler.
 
-### Example: ParseIntPipe
+---
+
+## Example: `ParseIntPipe`
 
 URL parameters are received as strings.
 
 For example:
 
-````http
+```http
 GET /api/products/10
-The id initially comes as:
+```
+
+The `id` initially comes as:
+
+```text
 "10"
+```
 
-We can use ParseIntPipe:
+We can use `ParseIntPipe`:
 
-```ts
+```typescript
 @Get('/api/products/:id')
 findProduct(
   @Param('id', ParseIntPipe) id: number,
 ) {
   return this.productsService.findById(id);
 }
-````
+```
 
 The flow becomes:
 
-```
+```text
 "10"
   ↓
 ParseIntPipe
@@ -411,33 +499,36 @@ Service
 Database
 ```
 
-ParseIntPipe transforms the value from a string into a number.
+`ParseIntPipe` transforms the value from a string into a number.
+
 It also validates that the value can be parsed as an integer.
+
 For example:
 
 ```http
 GET /api/products/abc
 ```
 
-The transformation fails, so the request is rejected and the
-route handler does not continue to the service or database.
+The transformation fails, so the request is rejected and the route
+handler does not continue to the service or database.
 
-Important Idea
-A Pipe can process the incoming data before the route handler
-executes.
+---
 
-So instead of handling the conversion manually inside the
-controller:
+## Important Idea
 
-```ts
+A Pipe can process the incoming data before the route handler executes.
+
+So instead of handling the conversion manually inside the controller:
+
+```typescript
 const id = parseInt(id);
 ```
 
 NestJS can handle it using:
 
-```ts
+```typescript
 @Param('id', ParseIntPipe) id: number
 ```
 
-This keeps the controller cleaner and makes the data entering
-the handler more predictable.
+This keeps the controller cleaner and makes the data entering the
+handler more predictable.
