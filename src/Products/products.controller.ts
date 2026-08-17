@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import type { Request, Response } from 'express';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 type ProductType = {id: number, title: string, price: number}
@@ -14,16 +13,18 @@ export class ProductController {
   ];
 
 
-  @Post('/api/products')
-  public createNewProduct (@Body() body:CreateProductDto ){
-      const newProduct:ProductType = {
-        id:this.products.length + 1,
-        title:body.title,
-        price:body.price
-      };
-      this.products.push(newProduct);
-      return this.products;
-  }
+@Post('/api/products')
+public createNewProduct(@Body() body: CreateProductDto) {
+  const newProduct: ProductType = {
+    id: this.products.length + 1,
+    title: body.title,
+    price: body.price,
+  };
+
+  this.products.push(newProduct);
+
+  return this.products;
+}
 
   @Get('/api/products')
   public getAllProducts() {
@@ -43,8 +44,8 @@ export class ProductController {
 
   
   @Put('/api/products/:id')
-  public updateProduct(@Param('id') id:string, @Body() body:UpdateProductDto){
-    const product = this.products.find( p => p.id === parseInt(id) );
+  public updateProduct(@Param('id' ,ParseIntPipe) id:number, @Body() body:UpdateProductDto){
+    const product = this.products.find( p => p.id === id );
     if(!product) throw new NotFoundException("product not found");
     console.log(body)
     return {message: 'product updated successfully with id ' + id};
@@ -53,8 +54,8 @@ export class ProductController {
 
  
   @Delete('/api/products/:id')
-  public deleteProduct(@Param('id') id:string ){
-    const product = this.products.find(p => p.id === parseInt(id));
+  public deleteProduct(@Param('id',ParseIntPipe) id:number ){
+    const product = this.products.find(p => p.id === id);
     if(!product) throw new NotFoundException("product not found");
 
     return {message: 'product deleted'};
