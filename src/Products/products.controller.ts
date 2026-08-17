@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put, ValidationPipe } from '@nestjs/common';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 type ProductType = {id: number, title: string, price: number}
@@ -44,7 +44,7 @@ public createNewProduct(@Body() body: CreateProductDto) {
 
   
   @Put('/api/products/:id')
-  public updateProduct(@Param('id' ,ParseIntPipe) id:number, @Body() body:UpdateProductDto){
+  public updateProduct(@Param('id' ,ParseIntPipe) id:number, @Body(new ValidationPipe()) body:UpdateProductDto){
     const product = this.products.find( p => p.id === id );
     if(!product) throw new NotFoundException("product not found");
     console.log(body)
